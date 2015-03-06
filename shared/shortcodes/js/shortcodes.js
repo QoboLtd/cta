@@ -30,7 +30,7 @@
 					InboundShortcodes.generate(); // runs refresh
 					InboundShortcodes.generateChild();
 					jQuery('.child-clone-row').last().find('input').first().focus(); // focus on new input
-					//InboundShortcodes.updatePreview();
+
 				}
 
 		var InboundShortcodes = {
@@ -75,7 +75,6 @@
 				jQuery('#_inbound_shortcodes_newoutput').remove();
 				jQuery('#inbound-shortcodes-form-table').prepend('<textarea id="_inbound_shortcodes_newoutput" class="hidden">' + newoutput + '</textarea>');
 
-				InboundShortcodes.updatePreview();
 
 			},
 
@@ -118,7 +117,7 @@
 				jQuery('#_inbound_shortcodes_newoutput').remove();
 				jQuery('#inbound-shortcodes-form-table').prepend('<textarea id="_inbound_shortcodes_newoutput" class="hidden">' + parent_output + '</textarea>');
 
-				InboundShortcodes.updatePreview();
+				//InboundShortcodes.updatePreview();
 
 			},
 
@@ -200,12 +199,9 @@
 				if( jQuery('#inbound-shortcodes-preview').size() > 0 ) {
 
 					var	shortcode = jQuery('#_inbound_shortcodes_newoutput').val(),
-						iframe = jQuery('#inbound-shortcodes-preview'),
-						theiframeSrc = iframe.attr('src'),
-						thesiframeSrc = theiframeSrc.split('preview.php'),
 						shortcode_name = jQuery("#inbound_current_shortcode").val(),
-						form_id = jQuery("#post_ID").val(),
-						iframeSrc = thesiframeSrc[0] + 'preview.php';
+						form_id = jQuery("#post_ID").val();
+
 					// Add form id to CPT preview
 					if ( shortcode_name === "insert_inbound_form_shortcode") {
 						if (typeof (inbound_forms) != "undefined" && inbound_forms !== null) {
@@ -215,8 +211,17 @@
 					if ( shortcode_name === "insert_styled_list_shortcode" || shortcode_name === "insert_button_shortcode") {
 							var shortcode = shortcode.replace(/#/g, '');
 					}
-					// updates the src value
-					iframe.attr( 'src', iframeSrc + '?post='+inbound_shortcodes.form_id+'&sc=' + InboundShortcodes.htmlEncode(shortcode));
+
+
+                    var requestData = {
+
+                        action: 'load_preview_ajax_request',
+                        sc: shortcode,
+                        post: inbound_shortcodes.form_id
+
+                    };
+
+                    loadAjaxContent(requestData,'inbound-shortcodes-preview')
 
 					//console.log('updated iframe');
 					// update the height
@@ -237,7 +242,7 @@
 				var H = jQuery(window).height();
 				var W = ( 1720 < width ) ? 1720 : width;
 				var this_height = ajaxCont.height();
-				console.log(this_height);
+
 
 					ajaxCont.css({
 						padding: 0,
@@ -295,13 +300,14 @@
 			                   });
 						jQuery('body').trigger("inbound_forms_data_ready"); // Trigger custom hook
 
+
 			            }
 			    },
 				update_fields : function () {
-								var insert_form = jQuery("#inbound_shortcode_insert_default").val();
+                    var insert_form = jQuery("#inbound_shortcode_insert_default").val();
 								var current_code = jQuery("#inbound_current_shortcode").val();
 								if ( current_code === "quick_insert_inbound_form_shortcode") {
-									return false;
+                                    return false;
 								}
 
 								var patt = /^form_/gi;
@@ -458,7 +464,8 @@
 					// Insert default forms
 					jQuery('body').on('change', '#inbound_shortcode_insert_default', function () {
 
-						InboundShortcodes.update_fields();
+						 InboundShortcodes.update_fields();
+
 					});
 					jQuery("body").on('click', '.switch-to-form-insert', function () {
 						tb_show( inbound_load.pop_title, inbound_load.image_dir + 'popup.php?popup=quick-forms&width=' + 900);
@@ -568,7 +575,9 @@
 						var option = jQuery(this).find("option[value='"+val+"']").text();
 						jQuery('#inbound_shortcode_form_name').val(option);
 						InboundShortcodes.update_fields();
-					});
+
+
+                    });
 				}
 
 
@@ -657,8 +666,8 @@
 				        for (var key in payload) {
 				        	//console.log( payload[key] );
 				        	var test = killBadGuys( payload[key] );
-				        	console.log(test);
-				        	console.log(payload[key]);
+				        	//console.log(test);
+				        	//console.log(payload[key]);
 				        	if( test === "bad") {
 				        		return false;
 				        	}
@@ -758,22 +767,32 @@
 					clearTimeout(jQuery.data(this, 'typeTimer'));
 					   jQuery.data(this, 'typeTimer', setTimeout(function() {
 						InboundShortcodes.generateChild(); // runs refresh for children
+						InboundShortcodes.updatePreview();
 						var update_dom = jQuery(this).val();
 						var update_dom = update_dom.replace(/"/g, "'");
 						jQuery(this).attr('value', update_dom);
 					}, 1000));
 				});
 
+
+                jQuery('.inbound-shortcodes-input').change(function(){
+
+                    InboundShortcodes.generate(); // runs refresh
+                    InboundShortcodes.generateChild();
+                    InboundShortcodes.updatePreview();
+                });
+
 				jQuery('.inbound-shortcodes-input', form).on('change, keyup', function () {
+
 					clearTimeout(jQuery.data(this, 'typeTimer'));
 						jQuery.data(this, 'typeTimer', setTimeout(function() {
 							var exclude_input = jQuery(this).parent().parent().parent().parent().hasClass('exclude-from-refresh');
 							console.log('yes');
 							console.log(exclude_input);
-							if (exclude_input != 'true'){
+                            if (exclude_input != 'true'){
 							InboundShortcodes.generate(); // runs refresh
 							InboundShortcodes.generateChild();
-							}
+                            }
 							var update_dom = jQuery(this).val();
 							var update_dom = update_dom.replace(/"/g, "'");
 							jQuery(this).attr('value', update_dom);
@@ -868,6 +887,7 @@
 	    			 console.log('reset mce');
 	    			 }, 300);
 	    		});
+                InboundShortcodes.updatePreview();
 
 			},
 			insert_shortcode: function() {
@@ -1021,9 +1041,20 @@
 				//window.tb_remove();
 				var shortcode = jQuery(this).attr('data-launch-sc');
 
+
 				setTimeout(function() {
-				 tb_show( inbound_load.pop_title, inbound_load.image_dir + 'popup.php?popup=' + shortcode + '&width=' + 900 + "&path=" + encodeURIComponent(inbound_load.image_dir));
-				        }, 500);
+
+                    var requestData = {
+                        action: 'load_popup_ajax_request',
+                        popup: shortcode,
+                        width: 900
+                    }
+
+                   loadAjaxContent( requestData,'TB_ajaxContent');
+
+                   //tb_show( inbound_load.pop_title, inbound_load.image_dir + 'popup.php?popup=' + shortcode + '&width=' + 900 + "&path=" + encodeURIComponent(inbound_load.image_dir));
+
+                }, 500);
 
 			});
 			jQuery("body").on('click', '.inbound-shortcodes-insert-two', function () {
@@ -1092,3 +1123,21 @@
 
 
 		});
+
+
+        function loadAjaxContent( requestData,addToElement) {//function called when the user clicks on a thickbox link
+
+            jQuery("#"+addToElement).fadeOut();
+            jQuery.ajax({
+                url: ajaxurl,
+                data: requestData,
+                success: function (data) {
+
+                   jQuery("#"+addToElement).html(data).fadeIn();
+
+                },
+                error: function (errorThrown) {
+                    console.log('Error' + errorThrown);
+                }
+            });
+        }

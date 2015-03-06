@@ -1233,7 +1233,7 @@ if ( !class_exists( 'CTA_Render' ) ) {
 			}
 
 			$script =	"<script>";
-			$script .= "	wp_cta_load_variation( '" .$cta_id ."' , '" .$variation_id ."' , '".self::$instance->disable_ajax ."' )";
+			$script .= "jQuery(document).ready(function(){	wp_cta_load_variation( '" .$cta_id ."' , '" .$variation_id ."' , '".self::$instance->disable_ajax ."' )})";
 			$script .= "</script>";
 
 			if ($return) {
