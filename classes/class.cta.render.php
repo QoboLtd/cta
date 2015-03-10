@@ -1028,7 +1028,7 @@ if ( !class_exists( 'CTA_Render' ) ) {
 			}
 
 			/* Reveal Variation if Preview */
-			(self::$instance->is_preview) ? $display = 'none' : $display = 'none';
+			(self::$instance->is_preview) ? $display = 'none' : $display = 'block';
 
 			/* Pepare Container Margins if Available */
 			$margin_top = (isset($selected_cta['margin-top'])) ? $selected_cta['margin-top'] : '0';
@@ -1233,7 +1233,7 @@ if ( !class_exists( 'CTA_Render' ) ) {
 			}
 
 			$script =	"<script>";
-			$script .= "	wp_cta_load_variation( '" .$cta_id ."' , '" .$variation_id ."' , '".self::$instance->disable_ajax ."' )";
+			$script .= "jQuery(document).ready(function(){	wp_cta_load_variation( '" .$cta_id ."' , '" .$variation_id ."' , '".self::$instance->disable_ajax ."' )})";
 			$script .= "</script>";
 
 			if ($return) {
